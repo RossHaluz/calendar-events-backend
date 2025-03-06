@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String?
+  surname   String?
+  googleId  String?
+  email     String   @unique
+  password  String?
+  events    Event[]
+
+  @@index([email])
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  description String?
+  priority    Priority @default(LOW)
+  start       DateTime
+  end         DateTime
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+enum Priority {
+  LOW
+  MIDDLE
+  HIGH
+}

@@ -12,29 +12,24 @@ const checkAuth = async (
   next: NextFunction
 ) => {
   const authHeader = req.headers.authorization as string;
-  if (!authHeader) {
-    return next(HttpError("Unouthorized", 401));
+  const token = authHeader?.split(" ")[1];
+
+  if (!token || token === "null" || token === "undefined") {
+    return next(HttpError("Unauthorized", 401));
   }
 
-  const [bearer, token] = authHeader.split(" ", 2);
+  try {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return next(HttpError("Secret key is required", 400));
+    }
 
-  if (bearer !== "Bearer" || !token) {
-    return next(HttpError("Unouthorized", 401));
+    const decoded = jwt.verify(token, secret) as JwtPayload;
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    return next(HttpError("Unauthorized", 401));
   }
-
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    return next(HttpError("Secret key is require", 400));
-  }
-
-  const decoded = jwt.verify(token, secret) as JwtPayload;
-
-  if (!decoded) {
-    return next(HttpError("Unouthorized", 401));
-  }
-
-  req.userId = decoded.userId;
-  next();
 };
 
 export { checkAuth };

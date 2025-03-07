@@ -47,10 +47,9 @@ app.get(
     res.cookie("__token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 3600 * 1000, // 1 година
+      maxAge: 3600 * 1000,
     });
 
-    console.log("Redirecting to:", "http://localhost:3000");
     res.redirect("http://localhost:3000");
   }
 );
